@@ -1,4 +1,3 @@
-import ballerina/time; 
 import ballerina/sql;
 import ballerinax/mysql;
 
@@ -8,7 +7,7 @@ public type Employee record {|
     string last_name;
     string email;
     string phone;
-    time:Date hire_date;
+    string hire_date;
     int? manager_id;
     string job_title;
 |};
