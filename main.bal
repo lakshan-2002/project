@@ -1,15 +1,13 @@
 import ballerina/sql;
 import ballerinax/mysql;
 
-public type Employee record {|
-    int employee_id?;
-    string first_name;
-    string last_name;
-    string email;
-    string phone;
-    string hire_date;
-    int? manager_id;
-    string job_title;
+public type expenses record {|
+    int id?;
+    string description;
+    decimal amount;
+    string category;
+    string date;
+
 |};
 
 configurable string USER = ?;
@@ -18,17 +16,16 @@ configurable string HOST = ?;
 configurable int PORT = ?;
 configurable string DATABASE = ?;
 
-final mysql:Client dbClient = check new(
-    host=HOST, user=USER, password=PASSWORD, port=PORT, database="Company"
+final mysql:Client dbClient = check new (
+    host = HOST, user = USER, password = PASSWORD, port = PORT, database = "expense_tracker"
 );
 
-isolated function addEmployee(Employee emp) returns string|error {
+isolated function addExpense(expenses exp) returns string|error {
     sql:ExecutionResult result = check dbClient->execute(`
-        INSERT INTO Employees (employee_id, first_name, last_name, email, phone,
-                               hire_date, manager_id, job_title)
-        VALUES (${emp.employee_id}, ${emp.first_name}, ${emp.last_name},  
-                ${emp.email}, ${emp.phone}, ${emp.hire_date}, ${emp.manager_id},
-                ${emp.job_title})
+        INSERT INTO expenses (id, description, amount, category, date)
+        VALUES (${exp.id}, ${exp.description}, ${exp.amount},  
+                ${exp.category}, ${exp.date}) 
+                
     `);
     int|string? lastInsertId = result.affectedRowCount;
     if lastInsertId is int {
@@ -38,49 +35,46 @@ isolated function addEmployee(Employee emp) returns string|error {
     }
 }
 
-isolated function getEmployee(int id) returns Employee|error {
-    Employee employee = check dbClient->queryRow(
-        `SELECT * FROM Employees WHERE employee_id = ${id}`
+isolated function getExpense(int id) returns expenses|error {
+    expenses exp = check dbClient->queryRow(
+        `SELECT * FROM expenses WHERE id = ${id}`
     );
-    return employee;
+    return exp;
 }
 
-isolated function getAllEmployees() returns Employee[]|error {
-    Employee[] employees = [];
-    stream<Employee, error?> resultStream = dbClient->query(
-        `SELECT * FROM Employees`
+isolated function getAllExpenses() returns expenses[]|error {
+    expenses[] exp = [];
+    stream<expenses, error?> resultStream = dbClient->query(
+        `SELECT * FROM expenses`
     );
-    check from Employee employee in resultStream
+    check from expenses expense in resultStream
         do {
-            employees.push(employee);
+            exp.push(expense);
         };
     check resultStream.close();
-    return employees;
+    return exp;
 }
 
-isolated function updateEmployee(Employee emp) returns string|error {
+isolated function updateExpense(expenses exp) returns string|error {
     sql:ExecutionResult result = check dbClient->execute(`
-        UPDATE Employees SET
-            first_name = ${emp.first_name}, 
-            last_name = ${emp.last_name},
-            email = ${emp.email},
-            phone = ${emp.phone},
-            hire_date = ${emp.hire_date}, 
-            manager_id = ${emp.manager_id},
-            job_title = ${emp.job_title}
-        WHERE employee_id = ${emp.employee_id}  
+        UPDATE expenses SET
+            description = ${exp.description}, 
+            amount = ${exp.amount},
+            category = ${exp.category},
+            date = ${exp.date}
+        WHERE id = ${exp.id}  
     `);
     int|string? affectedRowCount = result.affectedRowCount;
     if affectedRowCount is int {
-        return "Updated Successfully";
+        return "Updated Successfully.";
     } else {
         return error("Unable to obtain last insert ID");
     }
 }
 
-isolated function removeEmployee(int id) returns string|error {
+isolated function removeExpense(int id) returns string|error {
     sql:ExecutionResult result = check dbClient->execute(`
-        DELETE FROM Employees WHERE employee_id = ${id}
+        DELETE FROM expenses WHERE id = ${id}
     `);
     int? affectedRowCount = result.affectedRowCount;
     if affectedRowCount is int {

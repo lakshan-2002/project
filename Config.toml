@@ -2,4 +2,4 @@ USER="root"
 PASSWORD="PQRxyz@07"
 HOST="mysql-db"
 PORT=3306
-DATABASE="Company"
+DATABASE="expense_tracker"

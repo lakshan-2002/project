@@ -1,26 +1,25 @@
 import ballerina/http;
 
+service /expenses on new http:Listener(9090) {
 
-service /employees on new http:Listener(9090) {
+    isolated resource function post addExpense(@http:Payload expenses exp) returns string|error? {
+        return addExpense(exp);
+    }
 
-    isolated resource function post addEmployee(@http:Payload Employee emp) returns string|error? {
-        return addEmployee(emp);
+    isolated resource function get [int id]() returns expenses|error? {
+        return getExpense(id);
     }
-    
-    isolated resource function get [int id]() returns Employee|error? {
-        return getEmployee(id);
+
+    isolated resource function get getAllExpenses() returns expenses[]|error? {
+        return getAllExpenses();
     }
-    
-    isolated resource function get .() returns Employee[]|error? {
-        return getAllEmployees();
+
+    isolated resource function put updateExpense(@http:Payload expenses exp) returns string|error? {
+        return updateExpense(exp);
     }
-    
-    isolated resource function put updateEmployee(@http:Payload Employee emp) returns string|error? {
-        return updateEmployee(emp);
-    }
-    
+
     isolated resource function delete [int id]() returns string|error? {
-        return removeEmployee(id);       
+        return removeExpense(id);
     }
 
 }
